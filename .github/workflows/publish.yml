@@ -26,15 +26,15 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Build (only @content-engine/*)
-        run: pnpm -r --filter "@content-engine/*" build
+      - name: Build (only @tw20th/*)
+        run: pnpm -r --filter "@tw20th/*" build
 
-      - name: Publish (only @content-engine/*)
+      - name: Publish (only @tw20th/*)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm -r --filter "@content-engine/*" publish --access restricted --no-git-checks
+        run: pnpm -r --filter "@tw20th/*" publish --access restricted --no-git-checks
