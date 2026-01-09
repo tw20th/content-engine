@@ -1,7 +1,7 @@
 {
   "name": "@content-engine/core",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,10 +17,14 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "cli": "node ./dist/cli/index.js"
+    "cli": "node ./dist/cli/index.js",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "dotenv": "^16.6.0",
