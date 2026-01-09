@@ -1,0 +1,1 @@
+export { quietSpreadStrategy } from './quietSpread';

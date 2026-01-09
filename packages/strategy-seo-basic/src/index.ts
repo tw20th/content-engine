@@ -1,0 +1,1 @@
+export { seoBasicStrategy } from './seoBasic';

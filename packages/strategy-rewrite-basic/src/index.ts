@@ -1,0 +1,1 @@
+export { rewriteBasicStrategy } from './rewriteBasic';

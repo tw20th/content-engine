@@ -1,0 +1,97 @@
+# content-engine
+
+> 自分の代わりに、静かに試行錯誤し続けてくれる記事生成エンジン
+
+content-engine is a portable engine that generates articles via **Strategy / Source / Channel**,
+saves run logs, and supports a **monthly “quiet improvement loop”**.
+
+## Quick start (CLI)
+
+```bash
+pnpm install
+cp .env.example .env.local
+
+pnpm --filter @content-engine/core build
+ENV_FILE=.env.local pnpm --filter @content-engine/core exec content-engine monthly 2026-01 --open
+Environment variables
+The CLI loads env in this order:
+
+ENV_FILE (if set)
+
+.env.local in repo root
+
+.env in repo root
+
+Required:
+
+FIREBASE_PROJECT_ID
+
+FIREBASE_CLIENT_EMAIL
+
+FIREBASE_PRIVATE_KEY (keep line breaks as \n; code restores them)
+
+Commands
+Monthly loop
+bash
+コードをコピーする
+content-engine monthly YYYY-MM [--open] [--outDir scripts]
+aggregates contentEngineRuns
+
+writes a report JSON
+
+builds an insight draft JSON
+
+(optional) opens the draft for a quick edit
+
+saves it to monthlyInsights/YYYY-MM
+
+Firestore schema (minimum)
+contentEngineRuns/{runKey}
+topic: string
+
+title: string
+
+content: string
+
+strategyId: string
+
+sourceId: string
+
+channelId: string
+
+createdAt: string (ISO)
+
+savedAt: string (ISO)
+
+ymd: string (YYYY-MM-DD)
+
+runKey: string
+
+monthlyInsights/{YYYY-MM}
+month: string
+
+summary.feeling: "quiet" | "neutral" | "noisy"
+
+observations: string[]
+
+decisions: string[]
+
+experiments: string[]
+
+stopDoing: string[]
+
+notes: string
+
+decidedAt: string (ISO)
+
+Packages
+packages/content-engine → @content-engine/core (engine + CLI)
+
+packages/strategy-* → strategies
+
+apps/web → web UI + example environment
+
+Philosophy
+Short version: “don’t push, don’t shout, keep breathing.”
+
+Full philosophy: docs/philosophy.md
