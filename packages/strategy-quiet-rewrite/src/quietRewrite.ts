@@ -1,4 +1,4 @@
-import type { GenerateInput, GeneratedArticle, Strategy } from '@content-engine/core';
+import type { GenerateInput, GeneratedArticle, Strategy } from '@tw20th/content-engine';
 
 const nowIso = (): string => new Date().toISOString();
 

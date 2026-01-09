@@ -1,4 +1,4 @@
-import type { GenerateInput, GeneratedArticle, Strategy } from '@content-engine/core';
+import type { GenerateInput, GeneratedArticle, Strategy } from '@tw20th/content-engine';
 
 const buildTitle = (topic: string): string => {
   return `【結論】${topic}`;
