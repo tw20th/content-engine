@@ -1,5 +1,5 @@
 {
-  "name": "@content-engine/core",
+  "name": "@tw20th/content-engine",
   "version": "0.0.1",
   "private": false,
   "type": "module",

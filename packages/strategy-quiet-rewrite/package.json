@@ -1,5 +1,5 @@
 {
-  "name": "@content-engine/strategy-quiet-rewrite",
+  "name": "@tw20th/strategy-quiet-rewrite",
   "version": "0.1.0",
   "private": false,
   "type": "module",
