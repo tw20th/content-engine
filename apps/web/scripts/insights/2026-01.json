@@ -1,0 +1,22 @@
+{
+  "summary": {
+    "feeling": "quiet"
+  },
+  "observations": [
+    "主戦場は discover (13)。",
+    "素材は rewrite (9) が強い。",
+    "戦略は quiet-spread (7) が自然に残っている。",
+    "いちばん強い組み合わせは quiet-spread | keywords | discover (3)。",
+    "topic は 比較で疲れないための“見る順番” (6) に収束していた。"
+  ],
+  "decisions": [
+    "（来月やることを1つだけ書く）"
+  ],
+  "experiments": [
+    "（試すことがあれば1つだけ）"
+  ],
+  "stopDoing": [
+    "（やめることがあれば1つだけ）"
+  ],
+  "notes": "分析は正解を決めるためではなく、次に何を試すかを決めるため。数字よりも疲れなさを優先する。"
+}

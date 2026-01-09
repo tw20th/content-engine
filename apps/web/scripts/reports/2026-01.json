@@ -1,0 +1,168 @@
+{
+  "month": "2026-01",
+  "range": {
+    "startYmd": "2026-01-01",
+    "endYmd": "2026-01-31"
+  },
+  "docsCount": 19,
+  "byStrategy": [
+    {
+      "id": "quiet-spread",
+      "count": 7
+    },
+    {
+      "id": "quiet-rewrite",
+      "count": 5
+    },
+    {
+      "id": "seo-basic",
+      "count": 4
+    },
+    {
+      "id": "rewrite-basic",
+      "count": 3
+    }
+  ],
+  "bySource": [
+    {
+      "id": "rewrite",
+      "count": 9
+    },
+    {
+      "id": "keywords",
+      "count": 8
+    },
+    {
+      "id": "product",
+      "count": 2
+    }
+  ],
+  "byChannel": [
+    {
+      "id": "discover",
+      "count": 13
+    },
+    {
+      "id": "seo",
+      "count": 6
+    }
+  ],
+  "topCombos": [
+    {
+      "key": "quiet-spread | keywords | discover",
+      "count": 3,
+      "samples": [
+        "静かな広がり：疲れないモバイルバッテリーの選び方",
+        "静かな広がり：外出先で困らない“予備電源”の考え方"
+      ]
+    },
+    {
+      "key": "quiet-rewrite | rewrite | discover",
+      "count": 3,
+      "samples": [
+        "静かなリライト：疲れないモバイルバッテリーの選び方",
+        "静かなリライト：比較で疲れないための“見る順番”",
+        "静かなリライト：モバイルバッテリー選びで後悔しないチェック項目"
+      ]
+    },
+    {
+      "key": "seo-basic | keywords | seo",
+      "count": 2,
+      "samples": [
+        "疲れないモバイルバッテリーの選び方",
+        "持ち歩きが楽になるガジェット整理のコツ"
+      ]
+    },
+    {
+      "key": "rewrite-basic | rewrite | discover",
+      "count": 2,
+      "samples": [
+        "比較で疲れないための“見る順番”",
+        "モバイルバッテリー選びで後悔しないチェック項目"
+      ]
+    },
+    {
+      "key": "seo-basic | keywords | discover",
+      "count": 1,
+      "samples": [
+        "【結論】モバイルバッテリー選びで後悔しないチェック項目"
+      ]
+    },
+    {
+      "key": "quiet-spread | keywords | seo",
+      "count": 1,
+      "samples": [
+        "静かな広がり：モバイルバッテリー選びで後悔しないチェック項目"
+      ]
+    },
+    {
+      "key": "quiet-spread | product | discover",
+      "count": 1,
+      "samples": [
+        "静かな広がり：軽くて持ち歩きやすいモバイルバッテリーの選び方"
+      ]
+    },
+    {
+      "key": "quiet-spread | rewrite | discover",
+      "count": 1,
+      "samples": [
+        "静かな広がり：比較で疲れないための“見る順番”"
+      ]
+    },
+    {
+      "key": "quiet-spread | rewrite | seo",
+      "count": 1,
+      "samples": [
+        "静かな広がり：比較で疲れないための“見る順番”"
+      ]
+    },
+    {
+      "key": "seo-basic | rewrite | seo",
+      "count": 1,
+      "samples": [
+        "比較で疲れないための“見る順番”"
+      ]
+    },
+    {
+      "key": "rewrite-basic | rewrite | seo",
+      "count": 1,
+      "samples": [
+        "比較で疲れないための“見る順番”"
+      ]
+    },
+    {
+      "key": "quiet-rewrite | keywords | discover",
+      "count": 1,
+      "samples": [
+        "静かなリライト：疲れないモバイルバッテリーの選び方"
+      ]
+    }
+  ],
+  "topTopics": [
+    {
+      "topic": "比較で疲れないための“見る順番”",
+      "count": 6
+    },
+    {
+      "topic": "疲れないモバイルバッテリーの選び方",
+      "count": 5
+    },
+    {
+      "topic": "モバイルバッテリー選びで後悔しないチェック項目",
+      "count": 4
+    },
+    {
+      "topic": "軽くて持ち歩きやすいモバイルバッテリーの選び方",
+      "count": 2
+    },
+    {
+      "topic": "持ち歩きが楽になるガジェット整理のコツ",
+      "count": 1
+    },
+    {
+      "topic": "外出先で困らない“予備電源”の考え方",
+      "count": 1
+    }
+  ],
+  "generatedAt": "2026-01-08T08:51:25.324Z"
+}
