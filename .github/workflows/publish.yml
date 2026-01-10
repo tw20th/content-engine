@@ -23,9 +23,18 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
+          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        # version は書かない（package.json の packageManager を尊重）
+
+      - name: Configure npm registry for GitHub Packages
+        run: |
+          echo "@tw20th:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install
         run: pnpm install --frozen-lockfile
