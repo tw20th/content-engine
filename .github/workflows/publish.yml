@@ -17,20 +17,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ❗cache: 'pnpm' は入れない（pnpm がまだ無くてコケるため）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          registry-url: 'https://npm.pkg.github.com'
 
-      # ✅ package.json の packageManager(pnpm@10.0.0) をそのまま使う
+      # ✅ package.json の packageManager に合わせて pnpm を有効化
       - name: Enable Corepack (pnpm)
         run: |
           corepack enable
           corepack prepare pnpm@10.0.0 --activate
           pnpm -v
 
-      # ✅ GitHub Packages 用 npm 設定
       - name: Configure npm registry
         run: |
           echo "@tw20th:registry=https://npm.pkg.github.com" >> ~/.npmrc
