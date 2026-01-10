@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/strategy-quiet-rewrite",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
