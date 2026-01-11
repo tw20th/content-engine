@@ -1,4 +1,4 @@
-//apps/web/lib/contentEngineRegistry.ts
+// apps/web/lib/contentEngineRegistry.ts
 import {
   listChannels,
   listSources,
@@ -6,12 +6,13 @@ import {
   registerChannel,
   registerSource,
   registerStrategy,
-} from '@content-engine/core';
+} from '@tw20th/content-engine';
 
-import { quietSpreadStrategy } from '@content-engine/strategy-quiet-spread';
-import { seoBasicStrategy } from '@content-engine/strategy-seo-basic';
-import { rewriteBasicStrategy } from '@content-engine/strategy-rewrite-basic';
-import { quietRewriteStrategy } from '@content-engine/strategy-quiet-rewrite';
+import { quietSpreadStrategy } from '@tw20th/strategy-quiet-spread';
+import { seoBasicStrategy } from '@tw20th/strategy-seo-basic';
+import { rewriteBasicStrategy } from '@tw20th/strategy-rewrite-basic';
+import { quietRewriteStrategy } from '@tw20th/strategy-quiet-rewrite';
+import { openaiBasicStrategy } from '@tw20th/strategy-openai-basic';
 
 let initialized = false;
 
@@ -45,6 +46,7 @@ export const initContentEngineRegistry = (): void => {
   registerStrategy(seoBasicStrategy);
   registerStrategy(rewriteBasicStrategy);
   registerStrategy(quietRewriteStrategy);
+  registerStrategy(openaiBasicStrategy);
 
   // Source
   const ymdUtc = (iso: string): string => iso.slice(0, 10);
@@ -96,6 +98,7 @@ export const initContentEngineRegistry = (): void => {
       return { ...article, title };
     },
   });
+
   registerSource({
     sourceId: 'product',
     prepare: ({ nowIso }) => {
@@ -110,6 +113,7 @@ export const initContentEngineRegistry = (): void => {
       };
     },
   });
+
   registerSource({
     sourceId: 'rewrite',
     prepare: () => {

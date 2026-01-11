@@ -1,3 +1,4 @@
+//packages/content-engine/src/registry/sources.ts
 import type { Source, SourceId } from '../types';
 
 const sources = new Map<SourceId, Source>();

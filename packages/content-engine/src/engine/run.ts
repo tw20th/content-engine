@@ -15,19 +15,21 @@ export type RunInput = {
   sourceId: SourceId;
   channelId: ChannelId;
   topic?: string;
-  draft?: string; // ✅ 追加
+  draft?: string;
 };
 
 export type RunOptions = { strategy: Strategy } | { strategyId: StrategyId };
 
-export const runContentEngine = (input: RunInput, opts: RunOptions): GeneratedArticle => {
+export const runContentEngine = async (
+  input: RunInput,
+  opts: RunOptions,
+): Promise<GeneratedArticle> => {
   const strategy = 'strategy' in opts ? opts.strategy : getStrategy(opts.strategyId);
   const source = getSource(input.sourceId);
   const channel = getChannel(input.channelId);
 
   const nowIso = new Date().toISOString();
 
-  // ✅ topic が無ければ Source が供給
   const payload = input.topic
     ? { topic: input.topic }
     : source.prepare({ strategyId: strategy.strategyId, channelId: input.channelId, nowIso });
@@ -36,11 +38,11 @@ export const runContentEngine = (input: RunInput, opts: RunOptions): GeneratedAr
     topic: payload.topic,
     sourceId: input.sourceId,
     channelId: input.channelId,
-    draft: input.draft ?? payload.draft, // ✅ ここ
+    draft: input.draft ?? payload.draft,
     product: payload.product,
   };
 
-  const raw = strategy.generate(generateInput);
+  const raw = await strategy.generate(generateInput);
   const optimized = channel.optimize(raw);
   return optimized;
 };

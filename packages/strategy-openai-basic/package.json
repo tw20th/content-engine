@@ -1,5 +1,5 @@
 {
-  "name": "@tw20th/strategy-rewrite-basic",
+  "name": "@tw20th/strategy-openai-basic",
   "version": "0.0.11",
   "private": false,
   "type": "module",
@@ -14,9 +14,6 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -26,6 +23,9 @@
     "@tw20th/content-engine": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

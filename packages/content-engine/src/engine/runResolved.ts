@@ -27,7 +27,9 @@ const hasResolvedConfig = (input: RunResolvedInput): input is RunResolvedInputRe
   return 'config' in input;
 };
 
-export const runResolvedContentEngine = (input: RunResolvedInput): RunResolvedResult => {
+export const runResolvedContentEngine = async (
+  input: RunResolvedInput,
+): Promise<RunResolvedResult> => {
   const config = hasResolvedConfig(input)
     ? input.config
     : resolveEngineConfig({
@@ -46,7 +48,7 @@ export const runResolvedContentEngine = (input: RunResolvedInput): RunResolvedRe
 
   const opts: RunOptions = { strategyId: config.strategyId };
 
-  const article = runContentEngine(runInput, opts);
+  const article = await runContentEngine(runInput, opts);
 
   return { config, article };
 };

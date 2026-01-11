@@ -1,3 +1,4 @@
+//packages/content-engine/src/types.ts
 export type StrategyId = string;
 export type SourceId = string;
 export type ChannelId = string;
@@ -30,14 +31,11 @@ export type GeneratedArticle = {
   createdAt: string; // ISO
 };
 
+export type MaybePromise<T> = T | Promise<T>;
+
 export type Strategy = {
   strategyId: StrategyId;
-  /**
-   * ここは最小の実装として、Strategyが「どう書くか」を返す関数だけ持つ
-   * （後で prompt / structure / rules に拡張すればOK）
-   */
-
-  generate: (input: GenerateInput) => GeneratedArticle;
+  generate: (input: GenerateInput) => MaybePromise<GeneratedArticle>;
 };
 
 export type SourceContext = {

@@ -54,7 +54,7 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   // ✅ ここが超薄い：解決済みconfigをそのまま渡す
-  const { article } = runResolvedContentEngine({
+  const { article } = await runResolvedContentEngine({
     config,
     topic: forcedTopic,
     draft: forcedDraft,

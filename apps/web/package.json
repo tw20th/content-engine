@@ -10,11 +10,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@content-engine/core": "workspace:*",
-    "@content-engine/strategy-quiet-rewrite": "workspace:*",
-    "@content-engine/strategy-quiet-spread": "workspace:*",
-    "@content-engine/strategy-rewrite-basic": "workspace:*",
-    "@content-engine/strategy-seo-basic": "workspace:*",
+    "@tw20th/content-engine": "workspace:*",
+    "@tw20th/strategy-openai-basic": "workspace:*",
+    "@tw20th/strategy-quiet-rewrite": "workspace:*",
+    "@tw20th/strategy-quiet-spread": "workspace:*",
+    "@tw20th/strategy-rewrite-basic": "workspace:*",
+    "@tw20th/strategy-seo-basic": "workspace:*",
     "firebase-admin": "^13.6.0",
     "next": "16.1.1",
     "react": "19.2.3",

@@ -37,6 +37,14 @@ export const ENGINE_PRESETS: EnginePreset[] = [
     sourceId: 'keywords',
     channelId: 'seo',
   },
+  {
+    presetId: 'openai-default',
+    label: 'openai-default',
+    description: 'ChatGPTで生成（topic/title/content）',
+    strategyId: 'openai-basic',
+    sourceId: 'keywords',
+    channelId: 'discover',
+  },
 ];
 
 export const getPresetById = (presetId: string | null | undefined): EnginePreset | null => {
