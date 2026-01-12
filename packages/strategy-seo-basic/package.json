@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/strategy-seo-basic",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",

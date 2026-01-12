@@ -4,7 +4,9 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build",
+    "build": "pnpm -r build",
+    "build:pkgs": "pnpm -r --filter \"@tw20th/*\" build",
+    "build:engine": "pnpm -r --filter \"@tw20th/content-engine...\" build",
     "lint": "turbo lint",
     "format": "prettier -w ."
   },

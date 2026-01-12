@@ -7,7 +7,12 @@ import { rewriteBasicStrategy } from '@tw20th/strategy-rewrite-basic';
 import { seoBasicStrategy } from '@tw20th/strategy-seo-basic';
 import { openaiBasicStrategy } from '@tw20th/strategy-openai-basic';
 
+let registered = false;
+
 export const registerStrategies = (): void => {
+  if (registered) return;
+  registered = true;
+
   registerStrategy(quietSpreadStrategy);
   registerStrategy(quietRewriteStrategy);
   registerStrategy(rewriteBasicStrategy);

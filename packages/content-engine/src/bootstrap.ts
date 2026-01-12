@@ -4,13 +4,6 @@ import { registerSource } from './registry/sources.js';
 import { registerChannel } from './registry/channels.js';
 import { registerPreset, ENGINE_PRESETS } from './registry/presets.js';
 
-// strategies（今は export-only なので、ここは “直接strategyを登録” でOK）
-import { quietSpreadStrategy } from '@tw20th/strategy-quiet-spread';
-import { seoBasicStrategy } from '@tw20th/strategy-seo-basic';
-import { rewriteBasicStrategy } from '@tw20th/strategy-rewrite-basic';
-import { quietRewriteStrategy } from '@tw20th/strategy-quiet-rewrite';
-import { openaiBasicStrategy } from '@tw20th/strategy-openai-basic';
-
 let initialized = false;
 
 const clampTitle = (title: string, max: number): string => {
@@ -36,13 +29,6 @@ export const bootstrapContentEngine = (): void => {
 
   // ✅ Presets（まずは静的 presets を全部登録）
   for (const p of ENGINE_PRESETS) registerPreset(p);
-
-  // ✅ Strategies
-  registerStrategy(quietSpreadStrategy);
-  registerStrategy(seoBasicStrategy);
-  registerStrategy(rewriteBasicStrategy);
-  registerStrategy(quietRewriteStrategy);
-  registerStrategy(openaiBasicStrategy);
 
   // ✅ Sources
   const ymdUtc = (iso: string): string => iso.slice(0, 10);

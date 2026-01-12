@@ -1,3 +1,4 @@
+# .github/workflows/publish.yml
 name: Publish packages to GitHub Packages
 
 on:
@@ -40,14 +41,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages (ordered)
-        run: |
-          pnpm -r --filter "@tw20th/content-engine" --workspace-concurrency=1 build
-          pnpm -r --filter "@tw20th/strategy-*" --workspace-concurrency=1 build
+      - name: Build packages
+        run: pnpm -r --filter "@tw20th/*" build
 
-      - name: Publish packages (ordered)
+      - name: Publish packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm -r --filter "@tw20th/content-engine" publish --no-git-checks
-          pnpm -r --filter "@tw20th/strategy-*" publish --no-git-checks
+        run: pnpm -r --filter "@tw20th/*" publish --no-git-checks
