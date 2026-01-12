@@ -1,9 +1,9 @@
 // packages/content-engine/src/registry/resolve.ts
-import type { StrategyId, SourceId, ChannelId } from '../types';
-import { listStrategies } from './strategies';
-import { listSources } from './sources';
-import { listChannels } from './channels';
-import { getPresetById } from './presets';
+import type { StrategyId, SourceId, ChannelId } from '../types.js';
+import { listStrategies } from './strategies.js';
+import { listSources } from './sources.js';
+import { listChannels } from './channels.js';
+import { getPresetById } from './presets.js';
 
 export type ResolveEngineInput = {
   presetId?: string;

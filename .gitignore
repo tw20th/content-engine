@@ -43,3 +43,8 @@ packages/content-engine/scripts/
 # build outputs
 dist/
 packages/**/dist/
+
+.env
+.env.*
+apps/functions/.env*
+apps/web/.env*

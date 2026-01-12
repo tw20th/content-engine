@@ -6,10 +6,10 @@ import type {
   SourceId,
   ChannelId,
   GenerateInput,
-} from '../types';
-import { getStrategy } from '../registry/strategies';
-import { getSource } from '../registry/sources';
-import { getChannel } from '../registry/channels';
+} from '../types.js';
+import { getStrategy } from '../registry/strategies.js';
+import { getSource } from '../registry/sources.js';
+import { getChannel } from '../registry/channels.js';
 
 export type RunInput = {
   sourceId: SourceId;

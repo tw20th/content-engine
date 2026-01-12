@@ -1,1 +1,1 @@
-export { seoBasicStrategy } from './seoBasic';
+export { seoBasicStrategy } from './seoBasic.js';

@@ -1,5 +1,5 @@
 //packages/content-engine/src/registry/sources.ts
-import type { Source, SourceId } from '../types';
+import type { Source, SourceId } from '../types.js';
 
 const sources = new Map<SourceId, Source>();
 

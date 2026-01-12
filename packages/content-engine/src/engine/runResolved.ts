@@ -1,9 +1,9 @@
 // packages/content-engine/src/engine/runResolved.ts
-import type { GeneratedArticle } from '../types';
-import type { RunInput, RunOptions } from './run';
-import { runContentEngine } from './run';
-import type { ResolveEngineInput, ResolvedEngineConfig } from '../registry/resolve';
-import { resolveEngineConfig } from '../registry/resolve';
+import type { GeneratedArticle } from '../types.js';
+import type { RunInput, RunOptions } from './run.js';
+import { runContentEngine } from './run.js';
+import type { ResolveEngineInput, ResolvedEngineConfig } from '../registry/resolve.js';
+import { resolveEngineConfig } from '../registry/resolve.js';
 
 export type RunResolvedInputUnresolved = ResolveEngineInput & {
   topic?: string;

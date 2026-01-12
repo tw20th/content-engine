@@ -1,1 +1,1 @@
-export { quietRewriteStrategy } from './quietRewrite';
+export { quietRewriteStrategy } from './quietRewrite.js';

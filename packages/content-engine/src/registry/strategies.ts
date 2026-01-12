@@ -1,4 +1,5 @@
-import type { Strategy, StrategyId } from '../types';
+//packages/content-engine/src/registry/strategies.ts
+import type { Strategy, StrategyId } from '../types.js';
 
 const strategies = new Map<StrategyId, Strategy>();
 

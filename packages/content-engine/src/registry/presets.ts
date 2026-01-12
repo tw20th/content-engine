@@ -1,5 +1,5 @@
 // packages/content-engine/src/registry/presets.ts
-import type { StrategyId, SourceId, ChannelId } from '../types';
+import type { StrategyId, SourceId, ChannelId } from '../types.js';
 
 export type EnginePresetId = string;
 
@@ -47,7 +47,15 @@ export const ENGINE_PRESETS: EnginePreset[] = [
   },
 ];
 
+const presets = new Map<EnginePresetId, EnginePreset>();
+
+export const registerPreset = (preset: EnginePreset): void => {
+  presets.set(preset.presetId, preset);
+};
+
+export const listPresets = (): EnginePresetId[] => [...presets.keys()];
+
 export const getPresetById = (presetId: string | null | undefined): EnginePreset | null => {
   if (!presetId) return null;
-  return ENGINE_PRESETS.find((p) => p.presetId === presetId) ?? null;
+  return presets.get(presetId) ?? ENGINE_PRESETS.find((p) => p.presetId === presetId) ?? null;
 };

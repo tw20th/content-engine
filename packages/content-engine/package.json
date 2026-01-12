@@ -21,14 +21,19 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "cli": "node ./dist/cli/index.js",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "dotenv": "^16.6.0",
-    "firebase-admin": "^13.0.0"
+    "firebase-admin": "^13.0.0",
+    "@tw20th/strategy-quiet-spread": "workspace:*",
+    "@tw20th/strategy-seo-basic": "workspace:*",
+    "@tw20th/strategy-rewrite-basic": "workspace:*",
+    "@tw20th/strategy-quiet-rewrite": "workspace:*",
+    "@tw20th/strategy-openai-basic": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5"

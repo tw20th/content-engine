@@ -1,17 +1,19 @@
 //packages/content-engine/src/index.ts
 // core types
-export * from './types';
+export * from './types.js';
 
 // engine
-export * from './engine/run';
-export * from './engine/runResolved';
+export * from './engine/run.js';
+export * from './engine/runResolved.js';
 
-// registry (公開APIとして正式に出す)
-export * from './registry/strategies';
-export * from './registry/sources';
-export * from './registry/channels';
-export * from './registry/presets';
-export * from './registry/resolve';
+// registry
+export * from './registry/strategies.js';
+export * from './registry/sources.js';
+export * from './registry/channels.js';
+export * from './registry/presets.js';
+export * from './registry/resolve.js';
 
 // clients
-export * from './clients/openai';
+export * from './clients/openai.js';
+
+export * from './bootstrap.js';

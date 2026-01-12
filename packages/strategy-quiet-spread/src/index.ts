@@ -1,1 +1,1 @@
-export { quietSpreadStrategy } from './quietSpread';
+export { quietSpreadStrategy } from './quietSpread.js';

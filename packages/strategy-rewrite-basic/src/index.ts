@@ -1,1 +1,1 @@
-export { rewriteBasicStrategy } from './rewriteBasic';
+export { rewriteBasicStrategy } from './rewriteBasic.js';

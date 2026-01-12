@@ -1,5 +1,5 @@
 //packages/content-engine/src/registry/channels.ts
-import type { Channel, ChannelId } from '../types';
+import type { Channel, ChannelId } from '../types.js';
 
 const channels = new Map<ChannelId, Channel>();
 

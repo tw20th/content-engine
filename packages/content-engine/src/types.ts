@@ -1,4 +1,4 @@
-//packages/content-engine/src/types.ts
+// packages/content-engine/src/types.ts
 export type StrategyId = string;
 export type SourceId = string;
 export type ChannelId = string;
@@ -14,21 +14,25 @@ export type GenerateInput = {
   sourceId: SourceId;
   channelId: ChannelId;
 
-  // ✅ 将来の素材（今は未使用でもOK）
-  draft?: string; // rewrite用
+  draft?: string;
   product?: {
     id?: string;
     name?: string;
     affiliateUrl?: string;
-  }; // product用（最小）
+  };
+};
+
+export type GeneratedArticleMeta = {
+  strategyMetrics?: Record<string, unknown>;
 };
 
 export type GeneratedArticle = {
-  topic: string; // ✅ 追加
+  topic: string;
   title: string;
-  content: string; // markdown想定
+  content: string;
   ids: ContentEngineIds;
   createdAt: string; // ISO
+  meta?: GeneratedArticleMeta; // ✅ 追加（任意）
 };
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -41,7 +45,7 @@ export type Strategy = {
 export type SourceContext = {
   strategyId: StrategyId;
   channelId: ChannelId;
-  nowIso: string; // 生成タイミング（記録・分岐に使える）
+  nowIso: string;
 };
 
 export type SourcePayload = {
@@ -56,21 +60,10 @@ export type SourcePayload = {
 
 export type Source = {
   sourceId: SourceId;
-
-  /**
-   * Source責務：素材を用意する（topic等）
-   * - topicが無いときにエンジン側で呼ばれる
-   */
   prepare: (ctx: SourceContext) => SourcePayload;
 };
 
 export type Channel = {
   channelId: ChannelId;
-
-  /**
-   * Channel最適化：Strategyが生成した結果を“出し方”として整える
-   * - Strategyは「どう書くか」
-   * - Channelは「どう見せるか」
-   */
   optimize: (article: GeneratedArticle) => GeneratedArticle;
 };
