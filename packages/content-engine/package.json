@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/content-engine",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -10,8 +10,14 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
   "files": [
@@ -28,12 +34,7 @@
   },
   "dependencies": {
     "dotenv": "^16.6.0",
-    "firebase-admin": "^13.0.0",
-    "@tw20th/strategy-quiet-spread": "workspace:*",
-    "@tw20th/strategy-seo-basic": "workspace:*",
-    "@tw20th/strategy-rewrite-basic": "workspace:*",
-    "@tw20th/strategy-quiet-rewrite": "workspace:*",
-    "@tw20th/strategy-openai-basic": "workspace:*"
+    "firebase-admin": "^13.0.0"
   },
   "devDependencies": {
     "typescript": "^5"

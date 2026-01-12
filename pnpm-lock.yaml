@@ -26,6 +26,24 @@ importers:
 
   apps/functions:
     dependencies:
+      '@tw20th/content-engine':
+        specifier: workspace:*
+        version: link:../../packages/content-engine
+      '@tw20th/strategy-openai-basic':
+        specifier: workspace:*
+        version: link:../../packages/strategy-openai-basic
+      '@tw20th/strategy-quiet-rewrite':
+        specifier: workspace:*
+        version: link:../../packages/strategy-quiet-rewrite
+      '@tw20th/strategy-quiet-spread':
+        specifier: workspace:*
+        version: link:../../packages/strategy-quiet-spread
+      '@tw20th/strategy-rewrite-basic':
+        specifier: workspace:*
+        version: link:../../packages/strategy-rewrite-basic
+      '@tw20th/strategy-seo-basic':
+        specifier: workspace:*
+        version: link:../../packages/strategy-seo-basic
       cron-parser:
         specifier: ^4.9.0
         version: 4.9.0
@@ -109,21 +127,6 @@ importers:
 
   packages/content-engine:
     dependencies:
-      '@tw20th/strategy-openai-basic':
-        specifier: workspace:*
-        version: link:../strategy-openai-basic
-      '@tw20th/strategy-quiet-rewrite':
-        specifier: workspace:*
-        version: link:../strategy-quiet-rewrite
-      '@tw20th/strategy-quiet-spread':
-        specifier: workspace:*
-        version: link:../strategy-quiet-spread
-      '@tw20th/strategy-rewrite-basic':
-        specifier: workspace:*
-        version: link:../strategy-rewrite-basic
-      '@tw20th/strategy-seo-basic':
-        specifier: workspace:*
-        version: link:../strategy-seo-basic
       dotenv:
         specifier: ^16.6.0
         version: 16.6.1
