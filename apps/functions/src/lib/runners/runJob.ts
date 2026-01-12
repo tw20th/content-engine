@@ -46,9 +46,9 @@ const saveBlog = async (db: Firestore, jobId: string, runId: string, article: Ge
   const docRef = blogsCol(db).doc();
   await docRef.set({
     ...article,
-    strategyId: article.ids.strategyId,
-    sourceId: article.ids.sourceId,
-    channelId: article.ids.channelId,
+    strategyId: article.ids.strategyId ?? 'unknown',
+    sourceId: article.ids.sourceId ?? 'unknown',
+    channelId: article.ids.channelId ?? 'unknown',
     jobId,
     runId,
     createdAt: article.createdAt,
@@ -76,10 +76,10 @@ export const runJobOnce = async (
     const runLog: RunLog = {
       jobId,
       runId,
-      presetId: config.presetId,
-      strategyId: config.strategyId,
-      sourceId: config.sourceId,
-      channelId: config.channelId,
+      presetId: config.presetId ?? 'unknown',
+      strategyId: config.strategyId ?? 'unknown',
+      sourceId: config.sourceId ?? 'unknown',
+      channelId: config.channelId ?? 'unknown',
       startedAt,
       endedAt,
       status: 'success',

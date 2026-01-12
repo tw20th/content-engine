@@ -1,6 +1,8 @@
 // apps/functions/src/schedules/tick.ts
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
+import { defineSecret } from 'firebase-functions/params';
+import { Timestamp } from 'firebase-admin/firestore';
 
 import { getAdminDb } from '../lib/firebaseAdmin';
 import { listDueJobs, scheduledJobsCol } from '../lib/jobStore';
@@ -9,20 +11,24 @@ import { runJobOnce } from '../lib/runners/runJob';
 const REGION = 'asia-northeast1';
 const TIME_ZONE = 'Asia/Tokyo';
 
+const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
+
 export const tick = onSchedule(
   {
     schedule: 'every 5 minutes',
     timeZone: TIME_ZONE,
     region: REGION,
+    // ✅ これがないと Secret は関数に渡らない
+    secrets: [OPENAI_API_KEY],
   },
   async () => {
+    // ✅ content-engine が process.env を見る前提を満たす
+    process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
+
     const db = getAdminDb();
     const now = new Date();
 
-    const due = await listDueJobs(
-      db,
-      /* now */ (await import('firebase-admin/firestore')).Timestamp.fromDate(now),
-    );
+    const due = await listDueJobs(db, Timestamp.fromDate(now));
 
     if (due.length === 0) {
       logger.info('[tick] no due jobs');
@@ -34,11 +40,10 @@ export const tick = onSchedule(
     for (const { id: jobId, data: job } of due) {
       const result = await runJobOnce(db, jobId, job);
 
-      // jobの nextRunAt / lastRunAt を更新
       await scheduledJobsCol(db)
         .doc(jobId)
         .update({
-          lastRunAt: (await import('firebase-admin/firestore')).Timestamp.fromDate(new Date()),
+          lastRunAt: Timestamp.fromDate(new Date()),
           nextRunAt: result.nextRunAt,
         });
 
