@@ -1,3 +1,4 @@
+//packages/strategy-quiet-spread/src/quietSpread.ts
 import type { GenerateInput, GeneratedArticle, Strategy } from '@tw20th/content-engine';
 
 const buildTitle = (topic: string): string => {
