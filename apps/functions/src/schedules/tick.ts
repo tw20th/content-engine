@@ -12,18 +12,22 @@ const REGION = 'asia-northeast1';
 const TIME_ZONE = 'Asia/Tokyo';
 
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
+const NODE_AUTH_TOKEN = defineSecret('NODE_AUTH_TOKEN'); // ✅ 追加
 
 export const tick = onSchedule(
   {
     schedule: 'every 5 minutes',
     timeZone: TIME_ZONE,
     region: REGION,
-    // ✅ これがないと Secret は関数に渡らない
-    secrets: [OPENAI_API_KEY],
+    // ✅ Secret は関数に渡す（両方渡す）
+    secrets: [OPENAI_API_KEY, NODE_AUTH_TOKEN], // ✅ 追加
   },
   async () => {
     // ✅ content-engine が process.env を見る前提を満たす
     process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
+
+    // （任意）関数内で必要になるケースに備えて
+    process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN.value(); // ✅ 追加（害はない）
 
     const db = getAdminDb();
     const now = new Date();

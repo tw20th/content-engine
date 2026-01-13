@@ -1,4 +1,4 @@
-//apps/functions/src/http/runDue.ts
+// apps/functions/src/http/runDue.ts
 import { onRequest } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 import { defineSecret } from 'firebase-functions/params';
@@ -10,13 +10,17 @@ import { runJobOnce } from '../lib/runners/runJob';
 
 const REGION = 'asia-northeast1';
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
+const NODE_AUTH_TOKEN = defineSecret('NODE_AUTH_TOKEN'); // ✅ 追加
 
 export const runDue = onRequest(
-  { region: REGION, secrets: [OPENAI_API_KEY], invoker: 'public' },
+  { region: REGION, secrets: [OPENAI_API_KEY, NODE_AUTH_TOKEN], invoker: 'public' }, // ✅ 追加
   async (_req, res) => {
     try {
       // ✅ content-engine が process.env を見る前提を満たす
       process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
+
+      // （任意）関数内で必要になるケースに備えて
+      process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN.value(); // ✅ 追加
 
       const db = getAdminDb();
       const now = Timestamp.now();

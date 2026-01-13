@@ -26,24 +26,6 @@ importers:
 
   apps/functions:
     dependencies:
-      '@tw20th/content-engine':
-        specifier: workspace:*
-        version: link:../../packages/content-engine
-      '@tw20th/strategy-openai-basic':
-        specifier: workspace:*
-        version: link:../../packages/strategy-openai-basic
-      '@tw20th/strategy-quiet-rewrite':
-        specifier: workspace:*
-        version: link:../../packages/strategy-quiet-rewrite
-      '@tw20th/strategy-quiet-spread':
-        specifier: workspace:*
-        version: link:../../packages/strategy-quiet-spread
-      '@tw20th/strategy-rewrite-basic':
-        specifier: workspace:*
-        version: link:../../packages/strategy-rewrite-basic
-      '@tw20th/strategy-seo-basic':
-        specifier: workspace:*
-        version: link:../../packages/strategy-seo-basic
       cron-parser:
         specifier: ^4.9.0
         version: 4.9.0
@@ -60,6 +42,9 @@ importers:
       esbuild:
         specifier: ^0.25.12
         version: 0.25.12
+      esbuild-plugin-tsconfig-paths:
+        specifier: ^1.0.2
+        version: 1.0.2
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
@@ -1542,6 +1527,9 @@ packages:
     resolution: {integrity: sha512-w+5mJ3GuFL+NjVtJlvydShqE1eN3h3PbI7/5LAsYJP/2qtuMXjfL2LpHSRqo4b4eSF5K/DH1JXKUAHSB2UW50g==}
     engines: {node: '>= 0.4'}
 
+  esbuild-plugin-tsconfig-paths@1.0.2:
+    resolution: {integrity: sha512-bfFR+kbcBZ6Szzkwsv0SADab8WCNdkZOWnMRUjjefAUGq/o0i675XJvqw/pKn1kwLw04PaIHBT/rGVau9Hlfgg==}
+
   esbuild@0.25.12:
     resolution: {integrity: sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg==}
     engines: {node: '>=18'}
@@ -2858,6 +2846,10 @@ packages:
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
+
+  tsconfig-paths@4.2.0:
+    resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
+    engines: {node: '>=6'}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -4466,6 +4458,10 @@ snapshots:
       is-date-object: 1.1.0
       is-symbol: 1.1.1
 
+  esbuild-plugin-tsconfig-paths@1.0.2:
+    dependencies:
+      tsconfig-paths: 4.2.0
+
   esbuild@0.25.12:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.25.12
@@ -6032,6 +6028,12 @@ snapshots:
     dependencies:
       '@types/json5': 0.0.29
       json5: 1.0.2
+      minimist: 1.2.8
+      strip-bom: 3.0.0
+
+  tsconfig-paths@4.2.0:
+    dependencies:
+      json5: 2.2.3
       minimist: 1.2.8
       strip-bom: 3.0.0
 

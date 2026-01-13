@@ -187,3 +187,9 @@ runDue（手動）
 Web 実行と scheduledJobs 実行は 別ルート
 
 本番検証では runDue が最短ルート
+
+## Strategy の設計ルール（重要）
+
+- strategy パッケージは **export-only**（index.ts に副作用を書かない）
+- `registerStrategy` は apps（functions / web）側で行う
+- content-engine は strategy を直接 import しない

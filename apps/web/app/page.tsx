@@ -1,5 +1,5 @@
 // apps/web/app/page.tsx
-import { resolveEngineConfig, runResolvedContentEngine } from '@content-engine/core';
+import { resolveEngineConfig, runResolvedContentEngine } from '@tw20th/content-engine';
 import { EngineControls } from './components/EngineControls';
 import { getRegistryOptions, initContentEngineRegistry } from '../lib/contentEngineRegistry';
 import { saveRunToFirestore } from '../lib/saveRun';

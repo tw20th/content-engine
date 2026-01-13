@@ -3,20 +3,27 @@
     "target": "ES2020",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
     "lib": ["ES2020"],
     "outDir": "lib",
     "rootDir": "src",
-
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-
     "types": ["node"],
     "baseUrl": ".",
 
     "resolvePackageJsonExports": true,
-    "resolvePackageJsonImports": true
+    "resolvePackageJsonImports": true,
+
+    // ✅ 追加：workspace の src じゃなく dist の型を見に行かせる
+    "paths": {
+      "@tw20th/content-engine": ["../../packages/content-engine/dist/index.d.ts"],
+      "@tw20th/strategy-quiet-spread": ["../../packages/strategy-quiet-spread/dist/index.d.ts"],
+      "@tw20th/strategy-quiet-rewrite": ["../../packages/strategy-quiet-rewrite/dist/index.d.ts"],
+      "@tw20th/strategy-rewrite-basic": ["../../packages/strategy-rewrite-basic/dist/index.d.ts"],
+      "@tw20th/strategy-seo-basic": ["../../packages/strategy-seo-basic/dist/index.d.ts"],
+      "@tw20th/strategy-openai-basic": ["../../packages/strategy-openai-basic/dist/index.d.ts"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/types/content-engine.d.ts.bak"]
 }
