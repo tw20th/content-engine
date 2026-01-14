@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/strategy-openai-basic",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -26,7 +26,7 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "@tw20th/content-engine": "^0.0.16"
+    "@tw20th/content-engine": "^0.0.17"
   },
   "devDependencies": {
     "@tw20th/content-engine": "workspace:*",
