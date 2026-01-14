@@ -1,27 +1,22 @@
 // apps/functions/scripts/build.mjs
 import esbuild from 'esbuild';
-
-const EXTERNALS = [
-  'firebase-admin',
-  'firebase-functions',
-  'cron-parser',
-  '@tw20th/content-engine',
-  '@tw20th/strategy-quiet-spread',
-  '@tw20th/strategy-quiet-rewrite',
-  '@tw20th/strategy-rewrite-basic',
-  '@tw20th/strategy-seo-basic',
-  '@tw20th/strategy-openai-basic',
-];
+import fs from 'node:fs';
 
 await esbuild.build({
   entryPoints: ['src/index.ts'],
-  outfile: 'lib/index.js',
   bundle: true,
   platform: 'node',
   target: 'node20',
   format: 'cjs',
+  outfile: 'lib/index.js',
   sourcemap: true,
-  external: EXTERNALS,
+  external: ['firebase-admin', 'firebase-functions', 'cron-parser'],
 });
+
+const code = fs.readFileSync('lib/index.js', 'utf8');
+if (code.includes('@tw20th/')) {
+  console.error('[functions] ERROR: @tw20th imports remain in bundle');
+  process.exit(1);
+}
 
 console.log('[functions] build ok');

@@ -15,6 +15,12 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.7.3",
     "tailwindcss": "4.1.18",
-    "@tailwindcss/postcss": "4.1.18"
+    "@tailwindcss/postcss": "4.1.18",
+    "@tw20th/content-engine": "workspace:*",
+    "@tw20th/strategy-openai-basic": "workspace:*",
+    "@tw20th/strategy-quiet-rewrite": "workspace:*",
+    "@tw20th/strategy-quiet-spread": "workspace:*",
+    "@tw20th/strategy-rewrite-basic": "workspace:*",
+    "@tw20th/strategy-seo-basic": "workspace:*"
   }
 }

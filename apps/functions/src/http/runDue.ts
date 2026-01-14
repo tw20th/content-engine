@@ -7,6 +7,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { getAdminDb } from '../lib/firebaseAdmin';
 import { listDueJobs, scheduledJobsCol } from '../lib/jobStore';
 import { runJobOnce } from '../lib/runners/runJob';
+import { initEngineOnce } from '../lib/initEngine';
 
 const REGION = 'asia-northeast1';
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
@@ -21,6 +22,8 @@ export const runDue = onRequest(
 
       // （任意）関数内で必要になるケースに備えて
       process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN.value(); // ✅ 追加
+      process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
+      initEngineOnce();
 
       const db = getAdminDb();
       const now = Timestamp.now();

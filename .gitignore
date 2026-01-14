@@ -48,3 +48,6 @@ packages/**/dist/
 .env.*
 apps/functions/.env*
 apps/web/.env*
+
+# functions build output
+apps/functions/lib/apps/functions/.npmrc
