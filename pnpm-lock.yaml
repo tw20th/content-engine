@@ -139,51 +139,46 @@ importers:
         version: 5.9.3
 
   packages/strategy-openai-basic:
-    dependencies:
+    devDependencies:
       '@tw20th/content-engine':
         specifier: workspace:*
         version: link:../content-engine
-    devDependencies:
       typescript:
         specifier: ^5
         version: 5.9.3
 
   packages/strategy-quiet-rewrite:
-    dependencies:
+    devDependencies:
       '@tw20th/content-engine':
         specifier: workspace:*
         version: link:../content-engine
-    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
 
   packages/strategy-quiet-spread:
-    dependencies:
+    devDependencies:
       '@tw20th/content-engine':
         specifier: workspace:*
         version: link:../content-engine
-    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
 
   packages/strategy-rewrite-basic:
-    dependencies:
+    devDependencies:
       '@tw20th/content-engine':
         specifier: workspace:*
         version: link:../content-engine
-    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
 
   packages/strategy-seo-basic:
-    dependencies:
+    devDependencies:
       '@tw20th/content-engine':
         specifier: workspace:*
         version: link:../content-engine
-    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
