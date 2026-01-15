@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/strategy-quiet-rewrite",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -29,7 +29,7 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "@tw20th/content-engine": "^0.0.17"
+    "@tw20th/content-engine": "^0.0.18"
   },
   "devDependencies": {
     "@tw20th/content-engine": "workspace:*",
