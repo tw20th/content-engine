@@ -1,23 +1,26 @@
-// packages/content-engine/src/cli/firebaseAdmin.ts
+// packages/content-engine/src/firebase/firebaseAdmin.ts
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import type { Firestore } from 'firebase-admin/firestore';
 
-const must = (v: string | undefined, name: string): string => {
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-};
+const hasCertEnv = () =>
+  !!process.env.FIREBASE_PROJECT_ID &&
+  !!process.env.FIREBASE_CLIENT_EMAIL &&
+  !!process.env.FIREBASE_PRIVATE_KEY;
 
-export const getAdminDb = () => {
-  const projectId = must(process.env.FIREBASE_PROJECT_ID, 'FIREBASE_PROJECT_ID');
-  const clientEmail = must(process.env.FIREBASE_CLIENT_EMAIL, 'FIREBASE_CLIENT_EMAIL');
-  const privateKeyRaw = must(process.env.FIREBASE_PRIVATE_KEY, 'FIREBASE_PRIVATE_KEY');
-
-  const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
-
+export const getAdminDb = (): Firestore => {
   if (getApps().length === 0) {
-    initializeApp({
-      credential: cert({ projectId, clientEmail, privateKey }),
-    });
+    if (hasCertEnv()) {
+      const projectId = process.env.FIREBASE_PROJECT_ID!;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL!;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n');
+
+      initializeApp({
+        credential: cert({ projectId, clientEmail, privateKey }),
+      });
+    } else {
+      initializeApp();
+    }
   }
 
   return getFirestore();
