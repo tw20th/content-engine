@@ -1,7 +1,7 @@
 // packages/content-engine/src/firebase/runDue.ts
 import { onRequest } from 'firebase-functions/v2/https';
-import type { QueryDocumentSnapshot, DocumentData } from 'firebase-admin/firestore';
-import { getAdminDb } from '../cli/firebaseAdmin.js'; // ※場所は実ファイルに合わせて
+import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { getAdminDb } from '../cli/firebaseAdmin.js';
 
 export const runDue = onRequest({ region: 'asia-northeast1' }, async (_req, res) => {
   try {
@@ -17,9 +17,18 @@ export const runDue = onRequest({ region: 'asia-northeast1' }, async (_req, res)
 
     const batch = db.batch();
 
-    snap.docs.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+    snap.docs.forEach((doc: QueryDocumentSnapshot) => {
+      const data = doc.data() as { strategyId?: string; payload?: unknown };
+
       const runRef = db.collection('runs').doc();
-      batch.set(runRef, { jobId: doc.id, createdAt: now, status: 'queued' });
+      batch.set(runRef, {
+        jobId: doc.id,
+        createdAt: now,
+        status: 'queued',
+        strategyId: data.strategyId ?? '',
+        payload: data.payload ?? null,
+      });
+
       batch.update(doc.ref, { nextRunAt: now + 5 * 60 * 1000, updatedAt: now });
     });
 
