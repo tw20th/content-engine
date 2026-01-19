@@ -28,6 +28,16 @@
         "types": "./dist/firebase/index.d.ts",
         "default": "./dist/firebase/index.js"
       }
+    },
+    "./monthly": {
+      "import": {
+        "types": "./dist/monthly/index.d.ts",
+        "default": "./dist/monthly/index.js"
+      },
+      "require": {
+        "types": "./dist/monthly/index.d.ts",
+        "default": "./dist/monthly/index.js"
+      }
     }
   },
   "files": [

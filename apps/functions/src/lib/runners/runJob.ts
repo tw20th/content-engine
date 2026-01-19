@@ -1,4 +1,3 @@
-// apps/functions/src/lib/runners/runJob.ts
 import type { Firestore } from 'firebase-admin/firestore';
 import { Timestamp } from 'firebase-admin/firestore';
 import { randomUUID } from 'crypto';
@@ -12,6 +11,7 @@ import {
 import type { ScheduledJob, RunLog } from '../jobStore';
 import { blogsCol, runsCol, toTs } from '../jobStore';
 import { getNextRunDate } from '../cron';
+import { getActivePresetId } from '../engineConfig';
 
 export type RunJobResult = {
   runId: string;
@@ -65,7 +65,14 @@ export const runJobOnce = async (
   const startedAt = Timestamp.now();
 
   try {
+    // ✅ presetId 優先順位：job固有 > 全体運用(activePresetId) > engine側fallback
     const engineInput = buildEngineInput(job);
+
+    if (!engineInput.presetId) {
+      const activePresetId = await getActivePresetId(db);
+      if (activePresetId) engineInput.presetId = activePresetId;
+    }
+
     const { config, article } = await runResolvedContentEngine(engineInput);
 
     const blogId = await saveBlog(db, jobId, runId, article);

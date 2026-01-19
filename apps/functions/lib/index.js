@@ -30,10 +30,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
+  monthlyInsight: () => monthlyInsight,
+  monthlyInsightDebug: () => monthlyInsightDebug,
   runDue: () => runDue,
+  runJob: () => runJob,
   tick: () => tick
 });
 module.exports = __toCommonJS(index_exports);
+var import_v2 = require("firebase-functions/v2");
 
 // ../../packages/content-engine/dist/registry/strategies.js
 var strategies = /* @__PURE__ */ new Map();
@@ -57,14 +61,6 @@ var sources = /* @__PURE__ */ new Map();
 var registerSource = (source) => {
   sources.set(source.sourceId, source);
 };
-var getSource = (sourceId) => {
-  const s = sources.get(sourceId);
-  if (!s) {
-    const available = [...sources.keys()].join(", ");
-    throw new Error(`Source not found: "${sourceId}". Available: ${available || "(none)"}`);
-  }
-  return s;
-};
 var listSources = () => {
   return [...sources.keys()];
 };
@@ -74,35 +70,8 @@ var channels = /* @__PURE__ */ new Map();
 var registerChannel = (channel) => {
   channels.set(channel.channelId, channel);
 };
-var getChannel = (channelId) => {
-  const c = channels.get(channelId);
-  if (!c) {
-    const available = [...channels.keys()].join(", ");
-    throw new Error(`Channel not found: "${channelId}". Available: ${available || "(none)"}`);
-  }
-  return c;
-};
 var listChannels = () => {
   return [...channels.keys()];
-};
-
-// ../../packages/content-engine/dist/engine/run.js
-var runContentEngine = async (input, opts) => {
-  const strategy = "strategy" in opts ? opts.strategy : getStrategy(opts.strategyId);
-  const source = getSource(input.sourceId);
-  const channel = getChannel(input.channelId);
-  const nowIso3 = (/* @__PURE__ */ new Date()).toISOString();
-  const payload = input.topic ? { topic: input.topic } : source.prepare({ strategyId: strategy.strategyId, channelId: input.channelId, nowIso: nowIso3 });
-  const generateInput = {
-    topic: payload.topic,
-    sourceId: input.sourceId,
-    channelId: input.channelId,
-    draft: input.draft ?? payload.draft,
-    product: payload.product
-  };
-  const raw = await strategy.generate(generateInput);
-  const optimized = channel.optimize(raw);
-  return optimized;
 };
 
 // ../../packages/content-engine/dist/registry/presets.js
@@ -183,28 +152,6 @@ var resolveEngineConfig = (input) => {
     channelId,
     warnings
   };
-};
-
-// ../../packages/content-engine/dist/engine/runResolved.js
-var hasResolvedConfig = (input) => {
-  return "config" in input;
-};
-var runResolvedContentEngine = async (input) => {
-  const config = hasResolvedConfig(input) ? input.config : resolveEngineConfig({
-    presetId: input.presetId,
-    strategyId: input.strategyId,
-    sourceId: input.sourceId,
-    channelId: input.channelId
-  });
-  const runInput = {
-    sourceId: config.sourceId,
-    channelId: config.channelId,
-    topic: input.topic,
-    draft: input.draft
-  };
-  const opts = { strategyId: config.strategyId };
-  const article = await runContentEngine(runInput, opts);
-  return { config, article };
 };
 
 // ../../packages/content-engine/dist/clients/openai.js
@@ -669,234 +616,488 @@ var registerStrategies = () => {
   registerStrategy(openaiBasicStrategy);
 };
 
-// src/schedules/tick.ts
-var import_scheduler = require("firebase-functions/v2/scheduler");
-var import_firebase_functions2 = require("firebase-functions");
-var import_params = require("firebase-functions/params");
-var import_firestore4 = require("firebase-admin/firestore");
+// ../../packages/content-engine/dist/firebase/tick.js
+var import_https = require("firebase-functions/v2/https");
+var tick = (0, import_https.onRequest)({ region: "asia-northeast1" }, async (_req, res) => {
+  res.status(200).json({ ok: true, message: "tick ok", now: Date.now() });
+});
 
-// src/lib/firebaseAdmin.ts
+// ../../packages/content-engine/dist/firebase/runDue.js
+var import_https2 = require("firebase-functions/v2/https");
 var import_app = require("firebase-admin/app");
 var import_firestore = require("firebase-admin/firestore");
 var getAdminDb = () => {
-  if ((0, import_app.getApps)().length === 0) {
+  if ((0, import_app.getApps)().length === 0)
     (0, import_app.initializeApp)();
-  }
   return (0, import_firestore.getFirestore)();
 };
+var runDue = (0, import_https2.onRequest)({ region: "asia-northeast1" }, async (_req, res) => {
+  const now = Date.now();
+  try {
+    const db = getAdminDb();
+    const snap = await db.collection("scheduledJobs").where("nextRunAt", "<=", now).limit(20).get();
+    if (snap.empty) {
+      res.status(200).json({ ok: true, processed: 0, now });
+      return;
+    }
+    const batch = db.batch();
+    snap.docs.forEach((doc) => {
+      const job = doc.data();
+      const runRef = db.collection("runs").doc();
+      batch.set(runRef, {
+        jobId: doc.id,
+        createdAt: now,
+        status: "queued",
+        strategyId: job.strategyId ?? "",
+        payload: job.payload ?? {}
+      });
+      batch.update(doc.ref, {
+        nextRunAt: now + 5 * 60 * 1e3,
+        updatedAt: now
+      });
+    });
+    await batch.commit();
+    res.status(200).json({ ok: true, processed: snap.size, now });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    res.status(500).json({ ok: false, error: msg, now });
+  }
+});
 
-// src/lib/jobStore.ts
+// ../../packages/content-engine/dist/firebase/runJob.js
+var import_https3 = require("firebase-functions/v2/https");
+var import_app2 = require("firebase-admin/app");
 var import_firestore2 = require("firebase-admin/firestore");
-var scheduledJobsCol = (db) => db.collection("scheduledJobs");
-var runsCol = (db) => db.collection("runs");
-var blogsCol = (db) => db.collection("blogs");
-var toTs = (d) => import_firestore2.Timestamp.fromDate(d);
-var listDueJobs = async (db, now) => {
-  const snap = await scheduledJobsCol(db).where("enabled", "==", true).where("nextRunAt", "<=", now).limit(50).get();
-  return snap.docs.map((doc) => ({
-    id: doc.id,
-    data: doc.data()
-  }));
+var getAdminDb2 = () => {
+  if ((0, import_app2.getApps)().length === 0)
+    (0, import_app2.initializeApp)();
+  return (0, import_firestore2.getFirestore)();
 };
+var asGenerateInput = (payload) => {
+  if (!payload || typeof payload !== "object")
+    return {};
+  return payload;
+};
+var runJob = (0, import_https3.onRequest)({ region: "asia-northeast1" }, async (_req, res) => {
+  const db = getAdminDb2();
+  const now = Date.now();
+  let ref = null;
+  let runId = null;
+  try {
+    const snap = await db.collection("runs").where("status", "==", "queued").orderBy("createdAt", "asc").limit(1).get();
+    if (snap.empty) {
+      res.status(200).json({ ok: true, processed: 0, now });
+      return;
+    }
+    const doc = snap.docs[0];
+    ref = doc.ref;
+    runId = doc.id;
+    const runData = await db.runTransaction(async (tx) => {
+      const cur = await tx.get(doc.ref);
+      const data = cur.data() ?? {};
+      if (data.status !== "queued")
+        return null;
+      tx.update(doc.ref, {
+        status: "processing",
+        startedAt: data.startedAt ?? now,
+        updatedAt: now,
+        error: ""
+      });
+      return data;
+    });
+    if (!runData) {
+      res.status(200).json({ ok: true, processed: 0, now, skipped: true });
+      return;
+    }
+    const strategyIdRaw = runData.strategyId ?? "";
+    const payloadPartial = asGenerateInput(runData.payload);
+    const configSnap = await db.collection("contentEngineConfig").doc("current").get();
+    const configData = configSnap.exists ? configSnap.data() : void 0;
+    const activePresetId = configData?.activePresetId && configData.activePresetId.trim() ? configData.activePresetId.trim() : null;
+    const payloadPresetId = typeof payloadPartial.presetId === "string" ? (payloadPartial.presetId ?? "").trim() : "";
+    const presetId = payloadPresetId || activePresetId || void 0;
+    const resolved = resolveEngineConfig({
+      presetId,
+      strategyId: strategyIdRaw || void 0,
+      sourceId: payloadPartial.sourceId,
+      channelId: payloadPartial.channelId
+    });
+    const strategy = getStrategy(resolved.strategyId);
+    if (!strategy) {
+      const msg = `Strategy not found: "${resolved.strategyId}". Available: (${[]})`;
+      await doc.ref.update({
+        status: "error",
+        finishedAt: Date.now(),
+        updatedAt: Date.now(),
+        error: msg,
+        result: null,
+        resolved: {
+          strategyId: resolved.strategyId,
+          sourceId: resolved.sourceId,
+          channelId: resolved.channelId,
+          presetId: resolved.presetId ?? "",
+          warnings: resolved.warnings
+        }
+      });
+      res.status(200).json({ ok: false, processed: 1, runId, error: msg, now: Date.now() });
+      return;
+    }
+    const input = {
+      topic: payloadPartial.topic ?? "\u30C6\u30B9\u30C8\u8A18\u4E8B",
+      draft: payloadPartial.draft,
+      sourceId: resolved.sourceId,
+      channelId: resolved.channelId
+    };
+    const result = await strategy.generate(input);
+    await doc.ref.update({
+      status: "success",
+      finishedAt: Date.now(),
+      updatedAt: Date.now(),
+      error: "",
+      result,
+      resolved: {
+        strategyId: resolved.strategyId,
+        sourceId: resolved.sourceId,
+        channelId: resolved.channelId,
+        presetId: resolved.presetId ?? "",
+        warnings: resolved.warnings
+      }
+    });
+    res.status(200).json({
+      ok: true,
+      processed: 1,
+      runId,
+      strategyId: resolved.strategyId,
+      resolvedPresetId: resolved.presetId ?? "",
+      warnings: resolved.warnings,
+      title: result.title,
+      now: Date.now()
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (ref) {
+      try {
+        await ref.update({
+          status: "error",
+          finishedAt: Date.now(),
+          updatedAt: Date.now(),
+          error: msg,
+          result: null
+        });
+      } catch {
+      }
+    }
+    res.status(500).json({ ok: false, runId, error: msg, now: Date.now() });
+  }
+});
 
-// src/lib/runners/runJob.ts
+// src/schedules/monthlyInsight.ts
+var import_scheduler = require("firebase-functions/v2/scheduler");
+var import_firebase_functions = require("firebase-functions");
+var import_params = require("firebase-functions/params");
+var import_https4 = require("firebase-functions/v2/https");
+
+// ../../packages/content-engine/dist/cli/monthly.js
+var import_node_fs4 = __toESM(require("node:fs"), 1);
+var import_node_child_process = require("node:child_process");
+
+// ../../packages/content-engine/dist/cli/monthlyCheck.js
+var import_node_fs = __toESM(require("node:fs"), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+
+// ../../packages/content-engine/dist/cli/firebaseAdmin.js
+var import_app3 = require("firebase-admin/app");
 var import_firestore3 = require("firebase-admin/firestore");
-var import_crypto = require("crypto");
-
-// src/lib/cron.ts
-var import_cron_parser = __toESM(require("cron-parser"));
-var getNextRunDate = (cron, baseDate) => {
-  const interval = import_cron_parser.default.parseExpression(cron, {
-    currentDate: baseDate
-  });
-  return interval.next().toDate();
+var hasCertEnv = () => !!process.env.FIREBASE_PROJECT_ID && !!process.env.FIREBASE_CLIENT_EMAIL && !!process.env.FIREBASE_PRIVATE_KEY;
+var getAdminDb3 = () => {
+  if ((0, import_app3.getApps)().length === 0) {
+    if (hasCertEnv()) {
+      const projectId = process.env.FIREBASE_PROJECT_ID;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+      (0, import_app3.initializeApp)({
+        credential: (0, import_app3.cert)({ projectId, clientEmail, privateKey })
+      });
+    } else {
+      (0, import_app3.initializeApp)();
+    }
+  }
+  return (0, import_firestore3.getFirestore)();
 };
 
-// src/lib/runners/runJob.ts
-var buildEngineInput = (job) => {
+// ../../packages/content-engine/dist/cli/monthlyCheck.js
+var monthRangeYmd = (month) => {
+  const [y, m] = month.split("-").map((v) => Number(v));
+  const start = `${month}-01`;
+  const endDate = new Date(Date.UTC(y, m, 0));
+  const end = `${month}-${String(endDate.getUTCDate()).padStart(2, "0")}`;
+  return { start, end };
+};
+var inc = (map, key) => {
+  map[key] = (map[key] ?? 0) + 1;
+};
+var topEntries = (map) => Object.entries(map).sort((a, b) => b[1] - a[1]);
+var fetchRuns = async (startYmd, endYmd) => {
+  const db = getAdminDb3();
+  const startIso = `${startYmd}T00:00:00.000Z`;
+  const endIso = `${endYmd}T23:59:59.999Z`;
+  const snap = await db.collection("contentEngineRuns").where("savedAt", ">=", startIso).where("savedAt", "<=", endIso).get();
+  return snap.docs.map((d) => d.data());
+};
+var buildMonthlyReport = async (month) => {
+  const { start, end } = monthRangeYmd(month);
+  const docs = await fetchRuns(start, end);
+  const byStrategy = {};
+  const bySource = {};
+  const byChannel = {};
+  const byTopic = {};
+  const combos = {};
+  for (const doc of docs) {
+    const strategyId = doc.strategyId ?? "unknown";
+    const sourceId = doc.sourceId ?? "unknown";
+    const channelId = doc.channelId ?? "unknown";
+    const topic = doc.topic ?? "(no-topic)";
+    inc(byStrategy, strategyId);
+    inc(bySource, sourceId);
+    inc(byChannel, channelId);
+    inc(byTopic, topic);
+    const comboKey = `${strategyId} | ${sourceId} | ${channelId}`;
+    if (!combos[comboKey])
+      combos[comboKey] = { count: 0, samples: [] };
+    combos[comboKey].count += 1;
+    if (doc.title) {
+      const arr = combos[comboKey].samples;
+      if (!arr.includes(doc.title) && arr.length < 3)
+        arr.push(doc.title);
+    }
+  }
+  const topCombos = Object.entries(combos).map(([key, v]) => ({ key, count: v.count, samples: v.samples })).sort((a, b) => b.count - a.count).slice(0, 12);
+  const topTopics = topEntries(byTopic).slice(0, 12).map(([topic, count]) => ({ topic, count }));
   return {
-    presetId: job.engine.presetId,
-    strategyId: job.engine.strategyId,
-    sourceId: job.engine.sourceId,
-    channelId: job.engine.channelId,
-    topic: job.input?.topic,
-    draft: job.input?.draft
+    month,
+    range: { startYmd: start, endYmd: end },
+    docsCount: docs.length,
+    byStrategy: topEntries(byStrategy).map(([id, count]) => ({ id, count })),
+    bySource: topEntries(bySource).map(([id, count]) => ({ id, count })),
+    byChannel: topEntries(byChannel).map(([id, count]) => ({ id, count })),
+    topCombos,
+    topTopics,
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
 };
-var getStrategyMetrics = (article) => {
-  const a = article;
-  return a.meta?.strategyMetrics;
+var printReportText = (report) => {
+  console.log(`[content-engine] Monthly check: ${report.month}`);
+  console.log(`Range (ymd): ${report.range.startYmd} .. ${report.range.endYmd}`);
+  console.log("");
+  console.log(`Docs: ${report.docsCount}`);
+  console.log("");
+  const printBlock = (title, list) => {
+    console.log(`== ${title} ==`);
+    for (const row of list) {
+      console.log(`- ${row.id}: ${row.count}`);
+    }
+    console.log("");
+  };
+  printBlock("By Strategy", report.byStrategy);
+  printBlock("By Source", report.bySource);
+  printBlock("By Channel", report.byChannel);
+  console.log("== Top combos (strategy | source | channel) ==");
+  for (const c of report.topCombos) {
+    console.log(`- ${c.key}: ${c.count}`);
+    if (c.samples.length) {
+      console.log(`  samples: ${c.samples.join(" / ")}`);
+    }
+  }
+  console.log("");
+  console.log("== Top topics ==");
+  for (const t of report.topTopics) {
+    console.log(`- ${t.topic}: ${t.count}`);
+  }
+  console.log("");
 };
-var saveBlog = async (db, jobId, runId, article) => {
-  const docRef = blogsCol(db).doc();
-  await docRef.set({
-    ...article,
-    strategyId: article.ids.strategyId ?? "unknown",
-    sourceId: article.ids.sourceId ?? "unknown",
-    channelId: article.ids.channelId ?? "unknown",
-    jobId,
-    runId,
-    createdAt: article.createdAt
+var writeJson = (outPath, obj) => {
+  const abs = import_node_path.default.isAbsolute(outPath) ? outPath : import_node_path.default.join(process.cwd(), outPath);
+  import_node_fs.default.mkdirSync(import_node_path.default.dirname(abs), { recursive: true });
+  import_node_fs.default.writeFileSync(abs, JSON.stringify(obj, null, 2), "utf8");
+  return abs;
+};
+
+// ../../packages/content-engine/dist/cli/buildInsight.js
+var import_node_fs2 = __toESM(require("node:fs"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
+var readJson = (p) => {
+  const abs = import_node_path2.default.isAbsolute(p) ? p : import_node_path2.default.join(process.cwd(), p);
+  return JSON.parse(import_node_fs2.default.readFileSync(abs, "utf8"));
+};
+var writeJson2 = (p, obj) => {
+  const abs = import_node_path2.default.isAbsolute(p) ? p : import_node_path2.default.join(process.cwd(), p);
+  import_node_fs2.default.mkdirSync(import_node_path2.default.dirname(abs), { recursive: true });
+  import_node_fs2.default.writeFileSync(abs, JSON.stringify(obj, null, 2), "utf8");
+  return abs;
+};
+var top1 = (list) => list?.[0] ? `${list[0].id} (${list[0].count})` : "-";
+var buildInsightFromReport = (report) => {
+  const topChannel = top1(report.byChannel);
+  const topSource = top1(report.bySource);
+  const topStrategy = top1(report.byStrategy);
+  const topCombo = report.topCombos?.[0] ? `${report.topCombos[0].key} (${report.topCombos[0].count})` : "-";
+  const topTopic = report.topTopics?.[0] ? `${report.topTopics[0].topic} (${report.topTopics[0].count})` : "-";
+  return {
+    summary: { feeling: "quiet" },
+    observations: [
+      `\u4E3B\u6226\u5834\u306F ${topChannel}\u3002`,
+      `\u7D20\u6750\u306F ${topSource} \u304C\u5F37\u3044\u3002`,
+      `\u6226\u7565\u306F ${topStrategy} \u304C\u81EA\u7136\u306B\u6B8B\u3063\u3066\u3044\u308B\u3002`,
+      `\u3044\u3061\u3070\u3093\u5F37\u3044\u7D44\u307F\u5408\u308F\u305B\u306F ${topCombo}\u3002`,
+      `topic \u306F ${topTopic} \u306B\u53CE\u675F\u3057\u3066\u3044\u305F\u3002`
+    ],
+    decisions: ["\uFF08\u6765\u6708\u3084\u308B\u3053\u3068\u30921\u3064\u3060\u3051\u66F8\u304F\uFF09"],
+    experiments: ["\uFF08\u8A66\u3059\u3053\u3068\u304C\u3042\u308C\u30701\u3064\u3060\u3051\uFF09"],
+    stopDoing: ["\uFF08\u3084\u3081\u308B\u3053\u3068\u304C\u3042\u308C\u30701\u3064\u3060\u3051\uFF09"],
+    notes: "\u5206\u6790\u306F\u6B63\u89E3\u3092\u6C7A\u3081\u308B\u305F\u3081\u3067\u306F\u306A\u304F\u3001\u6B21\u306B\u4F55\u3092\u8A66\u3059\u304B\u3092\u6C7A\u3081\u308B\u305F\u3081\u3002\u6570\u5B57\u3088\u308A\u3082\u75B2\u308C\u306A\u3055\u3092\u512A\u5148\u3059\u308B\u3002"
+  };
+};
+var readReportFile = (reportPath) => readJson(reportPath);
+
+// ../../packages/content-engine/dist/cli/writeMonthlyInsight.js
+var import_node_fs3 = __toESM(require("node:fs"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
+var defaultPayload = (month) => ({
+  month,
+  summary: { feeling: "quiet" },
+  observations: ["\uFF08\u3053\u3053\u306B\u4ECA\u6708\u306E\u89B3\u6E2C\u3092\u66F8\u304F\uFF09"],
+  decisions: ["\uFF08\u6765\u6708\u3084\u308B\u3053\u3068\u30921\u3064\u3060\u3051\u66F8\u304F\uFF09"],
+  experiments: ["\uFF08\u8A66\u3059\u3053\u3068\u304C\u3042\u308C\u30701\u3064\u3060\u3051\uFF09"],
+  stopDoing: ["\uFF08\u3084\u3081\u308B\u3053\u3068\u304C\u3042\u308C\u30701\u3064\u3060\u3051\uFF09"],
+  notes: "\u5206\u6790\u306F\u6B63\u89E3\u3092\u6C7A\u3081\u308B\u305F\u3081\u3067\u306F\u306A\u304F\u3001\u6B21\u306B\u4F55\u3092\u8A66\u3059\u304B\u3092\u6C7A\u3081\u308B\u305F\u3081\u3002\u6570\u5B57\u3088\u308A\u3082\u75B2\u308C\u306A\u3055\u3092\u512A\u5148\u3059\u308B\u3002",
+  decidedAt: (/* @__PURE__ */ new Date()).toISOString()
+});
+var loadFromFile = (filePath) => {
+  const abs = import_node_path3.default.isAbsolute(filePath) ? filePath : import_node_path3.default.join(process.cwd(), filePath);
+  const raw = import_node_fs3.default.readFileSync(abs, "utf8");
+  return JSON.parse(raw);
+};
+var writeMonthlyInsight = async (month, filePath) => {
+  const db = getAdminDb3();
+  let payload = defaultPayload(month);
+  if (filePath) {
+    const fromFile = loadFromFile(filePath);
+    payload = {
+      ...payload,
+      ...fromFile,
+      month,
+      decidedAt: payload.decidedAt
+      // 実行時刻で固定
+    };
+  }
+  await db.collection("monthlyInsights").doc(month).set(payload, { merge: true });
+};
+
+// ../../packages/content-engine/dist/cli/monthly.js
+var run = (cmd) => {
+  console.log(`
+$ ${cmd}`);
+  (0, import_node_child_process.execSync)(cmd, { stdio: "inherit" });
+};
+var openFile = (filePath) => {
+  const platform = process.platform;
+  if (platform === "darwin")
+    return run(`open ${filePath}`);
+  if (platform === "win32")
+    return run(`cmd /c start "" "${filePath}"`);
+  return run(`xdg-open ${filePath}`);
+};
+var waitForEnter = (message) => new Promise((resolve) => {
+  console.log(message);
+  process.stdin.resume();
+  process.stdin.setEncoding("utf8");
+  process.stdin.once("data", () => {
+    process.stdin.pause();
+    resolve();
   });
-  return docRef.id;
-};
-var runJobOnce = async (db, jobId, job) => {
-  const runId = (0, import_crypto.randomUUID)();
-  const startedAt = import_firestore3.Timestamp.now();
-  try {
-    const engineInput = buildEngineInput(job);
-    const { config, article } = await runResolvedContentEngine(engineInput);
-    const blogId = await saveBlog(db, jobId, runId, article);
-    const endedAt = import_firestore3.Timestamp.now();
-    const nextRunDate = getNextRunDate(job.cron, /* @__PURE__ */ new Date());
-    const runLog = {
-      jobId,
-      runId,
-      presetId: config.presetId ?? "unknown",
-      strategyId: config.strategyId ?? "unknown",
-      sourceId: config.sourceId ?? "unknown",
-      channelId: config.channelId ?? "unknown",
-      startedAt,
-      endedAt,
-      status: "success",
-      createdBlogIds: [blogId],
-      metrics: getStrategyMetrics(article),
-      warnings: config.warnings
-    };
-    await runsCol(db).doc(runId).set(runLog);
-    return {
-      runId,
-      createdBlogIds: [blogId],
-      nextRunAt: toTs(nextRunDate)
-    };
-  } catch (e) {
-    const endedAt = import_firestore3.Timestamp.now();
-    const nextRunDate = getNextRunDate(job.cron, /* @__PURE__ */ new Date());
-    const err = e instanceof Error ? e : new Error("Unknown error");
-    const runLog = {
-      jobId,
-      runId,
-      presetId: job.engine.presetId,
-      strategyId: job.engine.strategyId ?? "unknown",
-      sourceId: job.engine.sourceId ?? "unknown",
-      channelId: job.engine.channelId ?? "unknown",
-      startedAt,
-      endedAt,
-      status: "error",
-      createdBlogIds: [],
-      error: {
-        message: err.message,
-        stack: err.stack
-      }
-    };
-    await runsCol(db).doc(runId).set(runLog);
-    return {
-      runId,
-      createdBlogIds: [],
-      nextRunAt: toTs(nextRunDate)
-    };
+});
+var runMonthlyPipeline = async (args) => {
+  const outDir = args.outDir ?? "scripts";
+  const reportPath = `${outDir}/reports/${args.month}.json`;
+  const insightPath = `${outDir}/insights/${args.month}.json`;
+  const report = await buildMonthlyReport(args.month);
+  printReportText(report);
+  const reportAbs = writeJson(reportPath, report);
+  const reportFromFile = readReportFile(reportAbs);
+  const insight = buildInsightFromReport(reportFromFile);
+  const insightAbs = writeJson2(insightPath, insight);
+  if (args.open) {
+    if (!import_node_fs4.default.existsSync(insightAbs))
+      throw new Error(`insight file not found: ${insightAbs}`);
+    openFile(insightAbs);
+    await waitForEnter(`
+\u{1F4DD} insight \u3092\u7DE8\u96C6\u3057\u305F\u3089 Enter \u3067\u7D9A\u884C\u3057\u307E\u3059\uFF08\u4FDD\u5B58\u3055\u308C\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u306D\uFF09
+> `);
   }
+  await writeMonthlyInsight(args.month, insightAbs);
+  console.log(`
+\u2705 Done monthly pipeline for ${args.month}`);
+  console.log(`- report:  ${reportPath}`);
+  console.log(`- insight: ${insightPath}`);
 };
 
-// src/lib/initEngine.ts
-var import_firebase_functions = require("firebase-functions");
-var initialized2 = false;
-var initEngineOnce = () => {
-  if (initialized2) return;
-  try {
-    bootstrapContentEngine();
-    registerStrategies();
-    initialized2 = true;
-    import_firebase_functions.logger.info("[initEngineOnce] initialized");
-  } catch (e) {
-    const err = e instanceof Error ? e : new Error("Unknown init error");
-    import_firebase_functions.logger.error("[initEngineOnce] failed", { message: err.message, stack: err.stack });
-    throw err;
-  }
-};
-
-// src/schedules/tick.ts
+// src/schedules/monthlyInsight.ts
 var REGION = "asia-northeast1";
 var TIME_ZONE = "Asia/Tokyo";
 var OPENAI_API_KEY = (0, import_params.defineSecret)("OPENAI_API_KEY");
 var NODE_AUTH_TOKEN = (0, import_params.defineSecret)("NODE_AUTH_TOKEN");
-var tick = (0, import_scheduler.onSchedule)(
+var toPrevMonth = (now) => {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const prev = new Date(y, m - 1, 1);
+  const yy = prev.getFullYear();
+  const mm = String(prev.getMonth() + 1).padStart(2, "0");
+  return `${yy}-${mm}`;
+};
+var monthlyInsight = (0, import_scheduler.onSchedule)(
   {
-    schedule: "every 5 minutes",
+    schedule: "0 6 1 * *",
+    // 毎月1日 06:00
     timeZone: TIME_ZONE,
     region: REGION,
-    // ✅ Secret は関数に渡す（両方渡す）
     secrets: [OPENAI_API_KEY, NODE_AUTH_TOKEN]
-    // ✅ 追加
   },
   async () => {
     process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
     process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN.value();
-    process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
-    initEngineOnce();
-    const db = getAdminDb();
-    const now = /* @__PURE__ */ new Date();
-    const due = await listDueJobs(db, import_firestore4.Timestamp.fromDate(now));
-    if (due.length === 0) {
-      import_firebase_functions2.logger.info("[tick] no due jobs");
-      return;
-    }
-    import_firebase_functions2.logger.info(`[tick] due jobs: ${due.length}`);
-    for (const { id: jobId, data: job } of due) {
-      const result = await runJobOnce(db, jobId, job);
-      await scheduledJobsCol(db).doc(jobId).update({
-        lastRunAt: import_firestore4.Timestamp.fromDate(/* @__PURE__ */ new Date()),
-        nextRunAt: result.nextRunAt
-      });
-      import_firebase_functions2.logger.info(
-        `[tick] ran job=${jobId} runId=${result.runId} blogs=${result.createdBlogIds.length}`
-      );
-    }
+    const month = toPrevMonth(/* @__PURE__ */ new Date());
+    import_firebase_functions.logger.info(`[monthlyInsight] start month=${month}`);
+    await runMonthlyPipeline({ month, open: false });
+    import_firebase_functions.logger.info(`[monthlyInsight] done month=${month}`);
   }
 );
-
-// src/http/runDue.ts
-var import_https = require("firebase-functions/v2/https");
-var import_firebase_functions3 = require("firebase-functions");
-var import_params2 = require("firebase-functions/params");
-var import_firestore5 = require("firebase-admin/firestore");
-var REGION2 = "asia-northeast1";
-var OPENAI_API_KEY2 = (0, import_params2.defineSecret)("OPENAI_API_KEY");
-var NODE_AUTH_TOKEN2 = (0, import_params2.defineSecret)("NODE_AUTH_TOKEN");
-var runDue = (0, import_https.onRequest)(
-  { region: REGION2, secrets: [OPENAI_API_KEY2, NODE_AUTH_TOKEN2], invoker: "public" },
-  // ✅ 追加
-  async (_req, res) => {
-    try {
-      process.env.OPENAI_API_KEY ||= OPENAI_API_KEY2.value();
-      process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN2.value();
-      process.env.OPENAI_API_KEY ||= OPENAI_API_KEY2.value();
-      initEngineOnce();
-      const db = getAdminDb();
-      const now = import_firestore5.Timestamp.now();
-      const due = await listDueJobs(db, now);
-      for (const { id: jobId, data: job } of due) {
-        const result = await runJobOnce(db, jobId, job);
-        await scheduledJobsCol(db).doc(jobId).update({
-          lastRunAt: import_firestore5.Timestamp.now(),
-          nextRunAt: result.nextRunAt
-        });
-      }
-      res.json({ ok: true, due: due.length });
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error("Unknown error");
-      import_firebase_functions3.logger.error("[runDue] fatal", { message: err.message, stack: err.stack });
-      res.status(500).json({ ok: false, error: { message: err.message } });
-    }
+var monthlyInsightDebug = (0, import_https4.onRequest)(
+  {
+    region: REGION,
+    secrets: [OPENAI_API_KEY, NODE_AUTH_TOKEN]
+  },
+  async (req, res) => {
+    process.env.OPENAI_API_KEY ||= OPENAI_API_KEY.value();
+    process.env.NODE_AUTH_TOKEN ||= NODE_AUTH_TOKEN.value();
+    const monthParam = typeof req.query.month === "string" ? req.query.month : null;
+    const month = monthParam && /^\d{4}-\d{2}$/.test(monthParam) ? monthParam : toPrevMonth(/* @__PURE__ */ new Date());
+    import_firebase_functions.logger.info(`[monthlyInsightDebug] start month=${month}`);
+    await runMonthlyPipeline({ month, open: false });
+    import_firebase_functions.logger.info(`[monthlyInsightDebug] done month=${month}`);
+    res.status(200).json({ ok: true, month });
   }
 );
 
 // src/index.ts
+(0, import_v2.setGlobalOptions)({ region: "asia-northeast1" });
 bootstrapContentEngine();
 registerStrategies();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  monthlyInsight,
+  monthlyInsightDebug,
   runDue,
+  runJob,
   tick
 });
 //# sourceMappingURL=index.js.map

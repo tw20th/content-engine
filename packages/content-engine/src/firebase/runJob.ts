@@ -1,3 +1,4 @@
+//packages/content-engine/src/firebase/runJob.ts
 import { onRequest } from 'firebase-functions/v2/https';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -90,7 +91,26 @@ export const runJob = onRequest({ region: 'asia-northeast1' }, async (_req, res)
     const strategyIdRaw = runData.strategyId ?? '';
     const payloadPartial = asGenerateInput(runData.payload);
 
+    // 1) current.activePresetId を毎回読む（判断の反映点）
+    const configSnap = await db.collection('contentEngineConfig').doc('current').get();
+    const configData = configSnap.exists
+      ? (configSnap.data() as { activePresetId?: string })
+      : undefined;
+    const activePresetId =
+      configData?.activePresetId && configData.activePresetId.trim()
+        ? configData.activePresetId.trim()
+        : null;
+
+    // 2) payload.presetId（任意）→ activePresetId → undefined の順
+    const payloadPresetId =
+      typeof (payloadPartial as { presetId?: unknown }).presetId === 'string'
+        ? ((payloadPartial as { presetId?: string }).presetId ?? '').trim()
+        : '';
+
+    const presetId = payloadPresetId || activePresetId || undefined;
+
     const resolved = resolveEngineConfig({
+      presetId,
       strategyId: strategyIdRaw || undefined,
       sourceId: payloadPartial.sourceId,
       channelId: payloadPartial.channelId,
@@ -149,6 +169,7 @@ export const runJob = onRequest({ region: 'asia-northeast1' }, async (_req, res)
       processed: 1,
       runId,
       strategyId: resolved.strategyId,
+      resolvedPresetId: resolved.presetId ?? '',
       warnings: resolved.warnings,
       title: result.title,
       now: Date.now(),

@@ -1,4 +1,4 @@
-// packages/content-engine/src/firebase/firebaseAdmin.ts
+//packages/content-engine/src/cli/firebaseAdmin.ts
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { Firestore } from 'firebase-admin/firestore';
