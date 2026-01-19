@@ -1,6 +1,6 @@
 {
   "name": "@tw20th/strategy-quiet-spread",
-  "version": "0.0.21",
+  "version": "0.0.23",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -31,7 +31,7 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "@tw20th/content-engine": "^0.0.19"
+    "@tw20th/content-engine": "^0.0.23"
   },
   "devDependencies": {
     "@tw20th/content-engine": "workspace:*",

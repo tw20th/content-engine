@@ -1,6 +1,7 @@
 //apps/functions/src/schedules/monthlyInsight.ts
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { logger } from 'firebase-functions';
+import { logger } from 'firebase-functions/v2';
+
 import { defineSecret } from 'firebase-functions/params';
 
 import { onRequest } from 'firebase-functions/v2/https';
